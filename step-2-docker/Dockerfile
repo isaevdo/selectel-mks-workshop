@@ -21,12 +21,12 @@ FROM alpine:3.15 AS downloader
 # ARG — переменная, доступная только во время сборки образа (не в runtime).
 # Здесь — адрес репозитория с HTML-шаблоном. Можно переопределить при сборке:
 #   docker build --build-arg TEMPLATE_REPO=https://... .
-ARG TEMPLATE_REPO="https://gitlab.com/cr-mks-webinar/web-sites.git"
+ARG TEMPLATE_REPO="https://github.com/isaevdo/selectel-mks-workshop.git"
 
 # Устанавливаем git и клонируем репозиторий с шаблоном сайта в /tmp.
 # Весь этот слой (git + репозиторий) останется только в этом этапе.
 RUN apk add git \
-    && git clone ${TEMPLATE_REPO} /tmp
+    && git clone --depth=1 ${TEMPLATE_REPO} /tmp/repo
 
 
 # ==============================================================================
@@ -41,7 +41,7 @@ ARG TEMPLATE_NAME="coffee-shop-html-template"
 
 # COPY --from=downloader — копируем файлы из первого этапа в финальный образ.
 # nginx раздаёт файлы из /usr/share/nginx/html — туда и кладём наш сайт.
-COPY --from=downloader /tmp/${TEMPLATE_NAME} /usr/share/nginx/html
+COPY --from=downloader /tmp/repo/web-templates/${TEMPLATE_NAME} /usr/share/nginx/html
 
 # Документируем порт — nginx слушает 80
 EXPOSE 80
