@@ -1,0 +1,36 @@
+# ==============================================================================
+# GATEWAY — точка входа для внешнего трафика
+# ==============================================================================
+# Gateway API — современный стандарт Kubernetes для управления входящим трафиком.
+# Пришёл на замену Ingress (старый подход).
+#
+# Gateway описывает "дверь в кластер":
+#   - Какой протокол (HTTP/HTTPS)
+#   - Какой порт слушать
+#   - Кто может создавать маршруты к этому gateway
+#
+# Envoy Gateway (установим через Helm) читает этот ресурс и создаёт
+# Load Balancer в Selectel с публичным IP-адресом.
+# ==============================================================================
+
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+
+metadata:
+  name: coffee-shop-gateway
+  namespace: workshop
+
+spec:
+  # gatewayClassName — ссылка на контроллер, который управляет этим Gateway.
+  # "eg" — стандартное имя класса Envoy Gateway после helm-установки.
+  gatewayClassName: eg
+
+  listeners:
+    - name: http            # Имя listener (произвольное)
+      protocol: HTTP        # Протокол: HTTP (без TLS). Для HTTPS добавить сертификат.
+      port: 80              # Порт, на котором ждём подключения
+
+      # allowedRoutes — кто может присоединять HTTPRoute к этому Gateway
+      allowedRoutes:
+        namespaces:
+          from: Same        # Разрешаем только из того же namespace (workshop)

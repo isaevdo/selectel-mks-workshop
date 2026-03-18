@@ -1,0 +1,13 @@
+# Файл с реальными паролями — никогда не коммитим
+terraform.tfvars
+
+# Кэш провайдеров и модулей Terraform
+.terraform/
+.terraform.lock.hcl
+
+# Файлы состояния — содержат ID и атрибуты всех созданных ресурсов
+*.tfstate
+*.tfstate.backup
+
+# Временные файлы планов
+*.tfplan

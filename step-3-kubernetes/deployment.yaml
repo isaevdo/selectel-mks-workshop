@@ -1,0 +1,89 @@
+# ==============================================================================
+# DEPLOYMENT — описание приложения в Kubernetes
+# ==============================================================================
+# Deployment — это инструкция для Kubernetes:
+#   "Держи запущенными N копий этого контейнера.
+#    Если что-то упадёт — перезапусти. Если нужно обновить — замени плавно."
+#
+# Kubernetes следит за состоянием: если под (Pod) упал, он создаст новый.
+# Это называется "самовосстановление" (self-healing).
+# ==============================================================================
+
+apiVersion: apps/v1       # Версия API Kubernetes для ресурса Deployment
+kind: Deployment          # Тип ресурса
+
+metadata:
+  name: coffee-shop       # Имя Deployment (уникально в namespace)
+  # Namespace — логическое пространство имён внутри кластера.
+  # Разделяет ресурсы разных команд/приложений. Мы создадим его перед деплоем.
+  namespace: workshop
+  labels:
+    app: coffee-shop      # Метки — ключ/значение для группировки и поиска ресурсов
+
+spec:
+  # --- Сколько копий (реплик) держать запущенными ---
+  # При replicas: 2 приложение переживёт падение одного узла без даунтайма
+  replicas: 3  # Три реплики — приложение переживёт падение узла без даунтайма
+
+  # --- Selector: как Deployment находит "свои" поды ---
+  # Deployment управляет подами, у которых есть метка app=coffee-shop
+  selector:
+    matchLabels:
+      app: coffee-shop
+
+  # --- Template: шаблон для создания подов ---
+  # Каждый под будет создан по этому шаблону
+  template:
+    metadata:
+      labels:
+        app: coffee-shop  # Метка совпадает с selector выше — так Deployment "видит" поды
+
+    spec:
+      containers:
+        - name: coffee-shop           # Имя контейнера (может быть несколько в одном поде)
+
+          # ВАЖНО: замените на адрес вашего реестра из шага 1!
+          # Формат: <registry_endpoint>/<image_name>:<tag>
+          image: cr.selcloud.ru/coffee-shop-registry/coffee-shop:latest
+
+          # imagePullPolicy: Always — всегда тянуть актуальную версию образа из реестра.
+          # Полезно при использовании тега :latest
+          imagePullPolicy: Always
+
+          ports:
+            - containerPort: 80    # Порт, который слушает наш nginx внутри контейнера
+
+          # --- Запросы и лимиты ресурсов ---
+          # requests: сколько ресурсов гарантировано поду (Kubernetes учитывает при планировании)
+          # limits: максимум, который под может потребить
+          resources:
+            requests:
+              cpu: "50m"       # 50 millicores = 0.05 CPU (очень мало, nginx лёгкий)
+              memory: "64Mi"   # 64 мегабайта RAM
+            limits:
+              cpu: "200m"      # Максимум 0.2 CPU
+              memory: "128Mi"  # Максимум 128 MB RAM
+
+          # --- Проверки работоспособности ---
+          # livenessProbe: Kubernetes проверяет, что приложение живо.
+          # Если проверка не прошла — контейнер перезапускается.
+          livenessProbe:
+            httpGet:
+              path: /          # Проверяем главную страницу
+              port: 80
+            initialDelaySeconds: 5   # Ждём 5 сек после старта
+            periodSeconds: 10        # Проверяем каждые 10 сек
+
+          # readinessProbe: Kubernetes проверяет, готов ли под принимать трафик.
+          # Пока не готов — трафик на него не идёт.
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 3
+            periodSeconds: 5
+
+      # craas-auth — секрет с токеном для доступа к приватному реестру CRaaS.
+      # Создаётся командой в README шага 3.
+      imagePullSecrets:
+        - name: craas-auth

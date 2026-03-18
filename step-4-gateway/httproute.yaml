@@ -1,0 +1,40 @@
+# ==============================================================================
+# HTTPROUTE — правила маршрутизации HTTP-трафика
+# ==============================================================================
+# HTTPRoute описывает: "Весь трафик, пришедший на Gateway, отправляй в Service."
+#
+# Здесь можно задавать тонкие правила:
+#   - маршрутизация по пути (/api → один сервис, /static → другой)
+#   - маршрутизация по заголовкам (Host, Authorization)
+#   - канареечные деплои (10% трафика → новая версия)
+#   - перенаправления и реврайты URL
+#
+# Для воркшопа используем простейший случай: весь трафик → coffee-shop-svc
+# ==============================================================================
+
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+
+metadata:
+  name: coffee-shop-route
+  namespace: workshop
+
+spec:
+  # parentRefs — к какому Gateway привязываем этот маршрут
+  parentRefs:
+    - name: coffee-shop-gateway   # Имя Gateway из gateway.yaml
+      namespace: workshop
+
+  # rules — список правил маршрутизации
+  rules:
+    - matches:
+        # Все запросы, путь начинается с "/" (то есть любой путь)
+        - path:
+            type: PathPrefix
+            value: /
+
+      backendRefs:
+        # Направляем трафик в наш Service
+        - name: coffee-shop-svc   # Имя Service из service.yaml
+          port: 80                # Порт Service
+          weight: 100             # 100% трафика (можно разделить между несколькими backend)

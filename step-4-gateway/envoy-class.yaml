@@ -1,0 +1,45 @@
+# ==============================================================================
+# ENVOYPROXY + GATEWAYCLASS — настройка контроллера
+# ==============================================================================
+# Envoy Gateway после установки через Helm НЕ создаёт GatewayClass автоматически.
+# Нужно создать два ресурса вручную:
+#
+#   EnvoyProxy   — конфигурация прокси: тип сервиса LoadBalancer для получения
+#                  публичного IP от Selectel.
+#
+#   GatewayClass — связывает наши Gateway-ресурсы с контроллером Envoy Gateway.
+#                  Без этого ресурса kubectl get gatewayclass вернёт "No resources found".
+# ==============================================================================
+
+# --- EnvoyProxy: настройка балансировщика ---
+# Указываем Envoy Gateway создавать Service типа LoadBalancer.
+# Selectel автоматически выделит публичный IP для этого сервиса.
+apiVersion: gateway.envoyproxy.io/v1alpha1
+kind: EnvoyProxy
+metadata:
+  name: custom-proxy-config
+  namespace: default        # EnvoyProxy всегда создаётся в namespace default
+spec:
+  provider:
+    type: Kubernetes
+    kubernetes:
+      envoyService:
+        type: LoadBalancer
+        externalTrafficPolicy: Cluster
+
+---
+
+# --- GatewayClass: регистрация контроллера ---
+# controllerName — идентификатор контроллера (фиксированное значение для Envoy Gateway).
+# parametersRef  — ссылка на EnvoyProxy выше.
+apiVersion: gateway.networking.k8s.io/v1
+kind: GatewayClass
+metadata:
+  name: eg                  # Это имя используется в gateway.yaml → gatewayClassName: eg
+spec:
+  controllerName: gateway.envoyproxy.io/gatewayclass-controller
+  parametersRef:
+    group: gateway.envoyproxy.io
+    kind: EnvoyProxy
+    name: custom-proxy-config
+    namespace: default
