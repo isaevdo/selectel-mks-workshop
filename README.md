@@ -19,6 +19,19 @@ MKS + CRaaS         coffee-shop:latest  Deployment+Service   HTTPRoute + LoadBal
 
 ---
 
+## Начало работы
+
+Скачайте репозиторий с материалами воркшопа на свой компьютер:
+
+```bash
+git clone https://github.com/isaevdo/selectel-mks-workshop.git
+cd selectel-mks-workshop
+```
+
+> Если git не установлен — можно скачать ZIP: на странице репозитория нажмите **Code → Download ZIP**, распакуйте архив.
+
+---
+
 ## Предварительные требования
 
 Установите на локальную машину:
