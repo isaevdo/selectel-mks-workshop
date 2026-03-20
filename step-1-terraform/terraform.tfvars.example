@@ -34,7 +34,7 @@ region       = "ru-9"
 # --- Тип узла ---
 # Проверьте актуальный flavor_id в панели:
 # Kubernetes → Создать кластер → Создать группу узлов → тип узла
-node_count     = 1
+node_count     = 2
 node_flavor_id = "1013"
 
 registry_name = "coffee-shop-registry"
