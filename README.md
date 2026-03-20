@@ -28,7 +28,7 @@ git clone https://github.com/isaevdo/selectel-mks-workshop.git
 cd selectel-mks-workshop
 ```
 
-> Если git не установлен — можно скачать ZIP: на странице репозитория нажмите **Code → Download ZIP**, распакуйте архив.
+> Если git не установлен — можно скачать ZIP: на странице репозитория нажмите **Code → Download ZIP**, распакуйте архив. Папка будет называться `selectel-mks-workshop-main` — переименуйте в `selectel-mks-workshop`.
 
 ---
 
