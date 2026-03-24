@@ -8,9 +8,7 @@
 #   docker build -f step-2-docker/Dockerfile ...
 # ==============================================================================
 
-# --platform linux/amd64 — серверы Selectel работают на x86-64.
-# Ноутбуки Apple M1/M2/M3 — на ARM. Без этого флага образ не запустится в кластере.
-FROM --platform=linux/amd64 nginx:1.23
+FROM nginx:1.23
 
 # ARG — переменная, доступная только во время сборки (не в runtime).
 # Здесь — название папки шаблона из web-templates/.

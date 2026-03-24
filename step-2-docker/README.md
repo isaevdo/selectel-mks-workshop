@@ -77,16 +77,17 @@ cd selectel-mks-workshop
 ### 3. Соберите образ
 
 ```bash
-docker build -f step-2-docker/Dockerfile -t ${REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG} .
+docker build --platform linux/amd64 -f step-2-docker/Dockerfile -t ${REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG} .
 ```
 
 > Разберём команду:
 > - `docker build` — собрать образ
+> - `--platform linux/amd64` — собрать для серверов x86-64 (серверы Selectel).
+>   **Обязательно для ноутбуков Apple M1/M2/M3** — без этого флага образ не запустится в кластере.
 > - `-f step-2-docker/Dockerfile` — путь к Dockerfile (он не в текущей папке)
 > - `-t` — тег (имя) образа: `реестр/имя:версия`
 > - `.` — контекст сборки — текущая папка (корень репозитория)
 >
-> Архитектура `linux/amd64` уже указана в Dockerfile через `FROM --platform=linux/amd64`.
 > Займёт **15–30 секунд**.
 
 ### 4. Посмотрите собранный образ
